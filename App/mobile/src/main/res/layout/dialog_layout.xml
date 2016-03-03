@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:fillViewport="true"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <RelativeLayout
+            android:id="@+id/layoutTop"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:background="#a41111"
+            android:layout_alignParentEnd="true">
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/layoutBottom"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_alignParentBottom="true"
+            android:layout_below="@id/layoutTop"
+            android:visibility="visible">
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="MORE INFO"
+                android:id="@+id/MoreInfobttn"
+                android:onClick="move_to_detail"
+                android:layout_gravity="center_horizontal"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="53dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Senator Blah Blah"
+                android:id="@+id/Title"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="73dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="REPUBLICAN"
+                android:id="@+id/Party"
+                android:layout_below="@+id/Title"
+                android:layout_centerHorizontal="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="blahblah@email.com"
+                android:id="@+id/Email"
+                android:layout_marginTop="54dp"
+                android:layout_below="@+id/Party"
+                android:layout_alignStart="@+id/Party" />
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/MailBttn"
+                android:src="@drawable/mailredenvelope"
+                android:layout_toStartOf="@+id/Email"
+                android:layout_alignBottom="@+id/Email"
+                android:layout_alignTop="@+id/Email" />
+        </RelativeLayout>
+        <!--LAYOUT_MARGINBOTTOM NEEDS TO BE HALF THE HEIGHT-->
+        <ImageView
+            android:id="@+id/overlapImage"
+            android:layout_width="136dp"
+            android:layout_height="136dp"
+            android:layout_above="@id/layoutBottom"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="-50dp"
+            android:adjustViewBounds="true"
+            android:src="@drawable/edlabovmin" />
+
+    </RelativeLayout>
+</ScrollView>

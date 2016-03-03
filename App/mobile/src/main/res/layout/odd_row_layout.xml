@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:weightSum="1">
+
+    <ImageView
+        android:layout_width="136dp"
+        android:layout_height="136dp"
+        android:id="@+id/CandiImg"
+        android:src="@drawable/lauralakoff" />
+
+    <TextView
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="What name"
+        android:id="@+id/Name"
+        android:textAlignment="textEnd"
+        android:layout_marginRight="20dp"
+        android:background="@color/white"
+        android:paddingRight="20dp" />
+</LinearLayout>
