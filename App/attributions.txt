@@ -1,0 +1,1 @@
+I was unable to complete the watch to phone connection using the Catnip code so I used parts of following code (https://github.com/jeffreyliu8/Android-Wearable-Send-Message-bi-directional) as a template to set up the connection between the watch to phone.
