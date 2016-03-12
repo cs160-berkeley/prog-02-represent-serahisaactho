@@ -24,11 +24,11 @@ Mobile Screens
 
 Wear Screens
 
-<img src="screenshots/representscreen.png" height="400" alt="Screenshot"/>
+<img src="screenshots/representscreen.PNG" height="400" alt="Screenshot"/>
 
-<img src="screenshots/Screen2.png" height="400" alt="Screenshot"/>
+<img src="screenshots/Screen2.PNG" height="400" alt="Screenshot"/>
 
-<img src="screenshots/Card.png" height="400" alt="Screenshot"/>
+<img src="screenshots/Card.PNG" height="400" alt="Screenshot"/>
 
-<img src="screenshots/2012.png" height="400" alt="Screenshot"/>
+<img src="screenshots/2012.PNG" height="400" alt="Screenshot"/>
 
