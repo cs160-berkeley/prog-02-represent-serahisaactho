@@ -1,6 +1,7 @@
 package javis.wearsyncservice;
 
 import android.app.Activity;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +20,16 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.twitter.sdk.android.Twitter;
+import com.twitter.sdk.android.core.AppSession;
+import com.twitter.sdk.android.core.Result;
+import com.twitter.sdk.android.core.TwitterAuthConfig;
+import com.twitter.sdk.android.core.TwitterCore;
+import com.twitter.sdk.android.core.TwitterException;
+import com.twitter.sdk.android.core.models.User;
+
+import io.fabric.sdk.android.Fabric;
+
 /**
  * Custom Adapter to handle different row layouts for odd/even positions
  */
@@ -26,6 +37,9 @@ public class ListViewAdapter extends ArrayAdapter {
 
     private Activity activity;
     List elements; // holds all the elements that occupy rows in the ListView
+    // Note: Your consumer key and secret should be obfuscated in your source code before shipping.
+    private static final String TWITTER_KEY = "xPBH74d17OPYBRSyOiAbo8HlN";//"plnyQCLPdJjOhAdaEkfQH4a73";
+    private static final String TWITTER_SECRET = "mg6OvvLt0xsmCmn67FqutOTrT4rsFAcIflaNGWEYStLvLj89HI";//"MbwjceC8iA8vOSNaRYq2GDGWD6r9kmvlpTcD2j1qmWHm3MM8ji";
 
     public ListViewAdapter(Activity activity, int resource, List objects) {
         super(activity, resource, objects);
@@ -48,7 +62,8 @@ public class ListViewAdapter extends ArrayAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        View v = convertView;
+        //View v = convertView;
+        final View v;
         //TODO: Add line stroke around the shape rows for the list view
         LayoutInflater inflater = (LayoutInflater) activity
                 .getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
@@ -68,12 +83,48 @@ public class ListViewAdapter extends ArrayAdapter {
         //implicit understanding that all the elements are String types.
         TextView candidate_name = (TextView)v.findViewById(R.id.Name);// exists in both layouts!!
         candidate_name.setText(txt);
-        ImageView candidate_img = (ImageView)v.findViewById(R.id.CandiImg);
-        int correct_img = set_correct_img(txt);
-        candidate_img.setImageResource(correct_img);
+        //ImageView candidate_img = (ImageView)v.findViewById(R.id.CandiImg);
+
+        //TWITTER CALL STUFF
+        final int final_position = position;
+        TwitterAuthConfig authConfig = new TwitterAuthConfig(TWITTER_KEY, TWITTER_SECRET);
+        Fabric.with(activity, new Twitter(authConfig)); //Is this the right context?
+
+        TwitterCore.getInstance().logInGuest(new com.twitter.sdk.android.core.Callback<AppSession>() {
+            @Override
+            public void success(Result appSessionResult) {
+                AppSession guestAppSession = (AppSession) appSessionResult.data;
+                //TwitterSession guestAppSession = (TwitterSession) appSessionResult.data;
+
+                new MyTwitterApiClient(guestAppSession).getUsersService().show(null, MainActivity.twitter_id[final_position], true, new com.twitter.sdk.android.core.Callback<User>() {
+                    @Override
+                    public void success(Result<User> result)
+                    {
+                        new DownloadImageTask((ImageView) v.findViewById(R.id.CandiImg))
+                                .execute(result.data.profileImageUrlHttps.replace("_normal", "_bigger"));
+                        //The image dimensions used to be 136x136
+                    }
+                    @Override
+                    public void failure(TwitterException exception)
+                    {
+
+                    }
+                });
+            }
+            public void failure(TwitterException exception) {
+                //Do something on failure
+                System.out.println("BAZOOKA FAILURE in guest auth");
+            }
+
+        });
+
+        //TWITTER CALL STUFF
+
+
+        //int correct_img = set_correct_img(txt);
+        //candidate_img.setImageResource(correct_img);
 
         return v;
-        //TODO: 136px is the magic number for the images in condensed view.
     }
 
     private int set_correct_img(String person_name)
@@ -83,7 +134,6 @@ public class ListViewAdapter extends ArrayAdapter {
         //to remove the whitespace between first & last name
         return R.id.(file_name.toString());
         */
-        //TODO: Find a better way to abstract finding the resources.
         switch(person_name)
         {
             case "Ed Labov": return R.drawable.edlabovmin;

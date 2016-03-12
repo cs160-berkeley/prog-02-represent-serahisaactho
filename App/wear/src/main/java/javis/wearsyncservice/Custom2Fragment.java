@@ -13,6 +13,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.gms.common.api.Result;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -28,11 +30,13 @@ public class Custom2Fragment extends CardFragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private static final String ARG_PARAM3 = "param3";
+    private static final String ARG_PARAM4 = "param4";
 
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
     private String mParam3;
+    private String mParam4;
 
     private OnFragmentInteractionListener mListener;
 
@@ -49,12 +53,14 @@ public class Custom2Fragment extends CardFragment {
      * @return A new instance of fragment Custom2Fragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static Custom2Fragment newInstance(String param1, String param2, int param3) {
+    public static Custom2Fragment newInstance(String param1, String param2, int param3,
+                                              int param4) {
         Custom2Fragment fragment = new Custom2Fragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
         args.putString(ARG_PARAM3, String.valueOf(param3));
+        args.putString(ARG_PARAM4, String.valueOf(param4));
         fragment.setArguments(args);
         return fragment;
     }
@@ -77,7 +83,7 @@ public class Custom2Fragment extends CardFragment {
         View w = inflater.inflate(R.layout.fragment_custom2, container, false);
         TextView title = (TextView)w.findViewById(R.id.Title);
         TextView party = (TextView)w.findViewById(R.id.Party);
-        ImageView img = (ImageView)w.findViewById(R.id.Img);
+        //ImageView img = (ImageView)w.findViewById(R.id.Img);
         title.setText(mParam1);
         party.setText(mParam2);
         if (mParam2.equals("DEMOCRAT"))
@@ -88,7 +94,38 @@ public class Custom2Fragment extends CardFragment {
         {
             party.setTextColor(Color.RED);
         }
-        img.setImageResource(Integer.parseInt(mParam3));
+        //img.setImageResource(Integer.parseInt(mParam3));
+
+        //TWITTER IMAGE STUFF
+       /* TwitterAuthConfig authConfig = new TwitterAuthConfig(TWITTER_KEY, TWITTER_SECRET);
+        Fabric.with(this, new Twitter(authConfig));
+        String output = "";
+        TwitterCore.getInstance().logInGuest(new com.twitter.sdk.android.core.Callback<AppSession>() {
+            @Override
+            public void success(Result appSessionResult) {
+                AppSession guestAppSession = (AppSession) appSessionResult.data;
+                //TwitterSession guestAppSession = (TwitterSession) appSessionResult.data;
+                    new MyTwitterApiClient(guestAppSession).getUsersService().show(null, curr_twitter_id, true, new com.twitter.sdk.android.core.Callback<User>() {
+                        @Override
+                        public void success(Result<User> result) {
+                            output =  (result.data.profileImageUrlHttps.replace("_normal", "_mini"));
+                        }
+
+                        @Override
+                        public void failure(TwitterException exception) {
+
+                        }
+                    });
+                }
+
+            public void failure(TwitterException exception) {
+                //Do something on failure
+                System.out.println("BAZOOKA FAILURE in guest auth");
+            }
+
+        });*/
+
+        //TWITTER IMAGE STUFF
         return w;
     }
 

@@ -19,10 +19,20 @@ import android.view.ViewGroup;
 public class PickerAdapter extends FragmentGridPagerAdapter {
 
     private final Context mContext;
+    public String[] name_title;
+    public String[] party;
+    private final Page[][] PAGES;
 
-    public PickerAdapter(Context ctx, FragmentManager fm) {
+    public PickerAdapter(Context ctx, FragmentManager fm, String[] name_title, String[] party) {
         super(fm);
         mContext = ctx;
+        this.name_title = name_title;
+        this.party = party;
+        PAGES = new Page[1][name_title.length];
+        for (int i=0;i<name_title.length;i++)
+        {
+            PAGES[0][i] = new Page(name_title[i], party[i], R.drawable.edlabov_wear, i);
+        }
     }
 
     static final int[][] BG_IMAGES = new int[][] {
@@ -36,35 +46,31 @@ public class PickerAdapter extends FragmentGridPagerAdapter {
         String title;
         String party;
         int pic_id;
+        int pos;
         int cardGravity = Gravity.CENTER;
         boolean expansionEnabled = false;
         float expansionFactor = 1.0f;
         int expansionDirection = CardFragment.EXPAND_DOWN;
 
-        public Page(String Title, String Party, int ID) {
+        public Page(String Title, String Party, int ID, int pos) {
             this.title = Title;
             this.party = Party;
             this.pic_id = ID;
+            this.pos = pos;
         }
     }
 
-    private final Page[][] PAGES = {
+    /*private final Page[][] PAGES = {
             {
                     new Page("Senator Laura Lakoff","REPUBLICAN",R.drawable.lauralakoff),
                     new Page("Senator Ronan Nash","DEMOCRAT",R.drawable.ronannash_wear),
                     new Page("Senator Ed Labov","REPUBLICAN", R.drawable.edlabov_wear),
                     new Page("Representative Hannah Whorf","DEMOCRAT", R.drawable.hannahwhorf_wear),
                     new Page("Senator Mark Hagen","DEMOCRAT", R.drawable.markhagen_wear)
-                    //Same order as mobile list view
-                    /*new Page("","REPUBLICAN Senator Laura Lakoff",R.drawable.lauralakoff),
-                    new Page("","DEMOCRAT  Senator Ronan Nash",R.drawable.ronannashmin),
-                    new Page("","REPUBLICAN Senator Ed Labov", R.drawable.edlabov_wear),
-                    new Page("","DEMOCRAT  Representative Hannah Whorf", R.drawable.hannahwhorf),
-                    new Page("","DEMOCRAT Senator Mark Hagen", R.drawable.markhagenmin)
-                    //Same order as mobile list view*/
             },
 
-    };
+    };*/
+
 
     @Override
     public CardFragment getFragment(int row, int col) {
@@ -72,9 +78,10 @@ public class PickerAdapter extends FragmentGridPagerAdapter {
         String title = page.title;
         String party = page.party;
         int id = page.pic_id;
+        int position = page.pos;
         //CardFragment fragment = CardFragment.create(party, title, id);
         //customCardFragment fragment = new customCardFragment();
-        Custom2Fragment fragment = Custom2Fragment.newInstance(title, party,id);
+        Custom2Fragment fragment = Custom2Fragment.newInstance(title, party,id, position);
         // Advanced settings
         fragment.setCardGravity(page.cardGravity);
         //fragment.setExpansionEnabled(page.expansionEnabled);

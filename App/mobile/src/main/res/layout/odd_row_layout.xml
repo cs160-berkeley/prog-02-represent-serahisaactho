@@ -5,19 +5,19 @@
     android:weightSum="1">
 
     <ImageView
-        android:layout_width="136dp"
-        android:layout_height="136dp"
-        android:id="@+id/CandiImg"
-        android:src="@drawable/lauralakoff" />
+        android:layout_width="73dp"
+        android:layout_height="73dp"
+        android:id="@+id/CandiImg" />
 
     <TextView
-        android:layout_width="200dp"
+        android:layout_width="210dp"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="What name"
         android:id="@+id/Name"
-        android:textAlignment="textEnd"
+        android:textAlignment="textStart"
         android:layout_marginRight="20dp"
         android:background="@color/white"
-        android:paddingRight="20dp" />
+        android:layout_marginLeft="20dp"
+        android:paddingLeft="10dp" />
 </LinearLayout>

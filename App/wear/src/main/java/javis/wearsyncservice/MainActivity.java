@@ -10,16 +10,10 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
-import android.support.wearable.view.BoxInsetLayout;
 import android.view.Gravity;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 
 public class MainActivity extends WearableActivity implements SensorEventListener {
 
@@ -35,6 +29,8 @@ public class MainActivity extends WearableActivity implements SensorEventListene
     float last_x;
     float last_y;
     float last_z;
+    String[] name_title;
+    String[] party;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +53,11 @@ public class MainActivity extends WearableActivity implements SensorEventListene
             t2.show();
         }
         //ON MANUAL UPDATE TOAST STUFF
+
+        //EXTRACTING REQUIRED INFO
+        name_title = intent.getStringArrayExtra(SunlightWearInstructions.NAMES_TITLES);
+        party = intent.getStringArrayExtra(SunlightWearInstructions.PARTIES);
+        //EXTRACTING REQUIRED INFO
 
         //SENSOR STUFF
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -86,9 +87,6 @@ public class MainActivity extends WearableActivity implements SensorEventListene
 
     @Override
     public final void onSensorChanged(SensorEvent event) {
-        // The light sensor returns a single value.
-        // Many sensors return 3 values, one for each axis.
-        //float lux = event.values[0];
         if ((event.values[0]!=last_x || event.values[1]!=last_y || event.values[2]!=last_z)
                 && last_x==BASE_VALUE && last_y==BASE_VALUE && last_z==BASE_VALUE)
         {
@@ -97,17 +95,19 @@ public class MainActivity extends WearableActivity implements SensorEventListene
             last_z = event.values[2];
             //This clause is put in to avoid the very first acceleration change detection
         }
-            else if (event.values[0]!=last_x || event.values[1]!=last_y || event.values[2]!=last_z) {
+            //else if (event.values[0]!=last_x || event.values[1]!=last_y || event.values[2]!=last_z) {
+        else if (Math.abs(event.values[0]-last_x)>=10
+                || Math.abs(event.values[1]-last_y)>=10
+                || Math.abs(event.values[2]-last_z)>=10) {
             System.out.println("BAZOOKA Detected a shake " + event.values[0] + ", " + event.values[1] + ", " +
                     event.values[2]);
             last_x = event.values[0];
             last_y = event.values[1];
             last_z = event.values[2];
-            Toast watch_t = Toast.makeText(getApplicationContext(),"Random Location: XYZ", Toast.LENGTH_SHORT);
-            watch_t.show();
+            //Toast watch_t = Toast.makeText(getApplicationContext(),"Random Location: XYZ", Toast.LENGTH_SHORT);
+            //watch_t.show();
             fireMessage("GO/Congressional"); //The message tells the phone to shift to congressional view
         }
-        // Do something with this sensor value.
     }
 
     public void go_to_2012(View w)
@@ -129,6 +129,8 @@ public class MainActivity extends WearableActivity implements SensorEventListene
         Intent intent = new Intent(this, PickerActivity.class);
         //intent.putExtra("KEY", last_clicked); --> Don't need to pass in anything extra.
         //passing things along to the next screen
+        intent.putExtra(SunlightWearInstructions.NAMES_TITLES, name_title);
+        intent.putExtra(SunlightWearInstructions.PARTIES, party);
         startActivity(intent);
     }
 

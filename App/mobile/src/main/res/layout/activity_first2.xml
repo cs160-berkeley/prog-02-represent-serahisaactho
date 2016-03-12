@@ -22,7 +22,7 @@
         android:paddingRight="5dp"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
-        android:onClick="go_to_list_current" />
+        android:onClick="do_current_location_stuff" />
 
     <TextView
         android:layout_width="wrap_content"

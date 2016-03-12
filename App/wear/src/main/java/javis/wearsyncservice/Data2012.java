@@ -11,7 +11,14 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 public class Data2012 extends WearableActivity implements SensorEventListener {
 
@@ -26,6 +33,40 @@ public class Data2012 extends WearableActivity implements SensorEventListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_2012);
+
+        String county_name = WatchWearableListenerService.county_name;
+
+        try {
+
+            //JSON ELECTION STUFF
+            try {
+                JSONArray election_arr = new JSONArray(loadJSONFromAsset());
+                for (int i=0;i<election_arr.length();i++) {
+                    JSONObject election_obj = election_arr.getJSONObject(i);
+                    if (county_name.startsWith(election_obj.getString("county-name")))//((election_obj.getString("county-name")+" County").equals(county_name))///(county_name.startsWith(election_obj.getString("county-name"))==true);
+                    {
+                        /*System.out.println("BAZOOKA county-name = "+county_name+" json name = "+
+                                election_obj.getString("county-name"));*/
+                        TextView state = (TextView)findViewById(R.id.XYZ_State);
+                        TextView county = (TextView)findViewById(R.id.ABC_County);
+                        TextView obama = (TextView)findViewById(R.id.Obama_Votes);
+                        TextView romney = (TextView)findViewById(R.id.Romney_Votes);
+                        state.setText(election_obj.getString("state-postal"));
+                        county.setText(county_name);
+                        obama.setText(election_obj.getString("obama-percentage") + "%");
+                        romney.setText(election_obj.getString("romney-percentage") + "%");
+                    }
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        catch(Exception e)
+        {
+            System.out.println("BAZOOKA Failure in GeoCodeTask " + e.getMessage());
+            e.printStackTrace();
+        }
 
         //SENSOR STUFF
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -45,9 +86,6 @@ public class Data2012 extends WearableActivity implements SensorEventListener {
 
     @Override
     public final void onSensorChanged(SensorEvent event) {
-        // The light sensor returns a single value.
-        // Many sensors return 3 values, one for each axis.
-        //float lux = event.values[0];
         if ((event.values[0]!=last_x || event.values[1]!=last_y || event.values[2]!=last_z)
                 && last_x==BASE_VALUE && last_y==BASE_VALUE && last_z==BASE_VALUE)
         {
@@ -56,21 +94,23 @@ public class Data2012 extends WearableActivity implements SensorEventListener {
             last_z = event.values[2];
             //This clause is put in to avoid the very first acceleration change detection
         }
-        else if (event.values[0]!=last_x || event.values[1]!=last_y || event.values[2]!=last_z) {
+        else if (Math.abs(event.values[0]-last_x)>=10
+                || Math.abs(event.values[1]-last_y)>=10
+                || Math.abs(event.values[2]-last_z)>=10) {
+        //else if (event.values[0]!=last_x || event.values[1]!=last_y || event.values[2]!=last_z) {
             System.out.println("BAZOOKA Detected a shake " + event.values[0] + ", " + event.values[1] + ", " +
                     event.values[2]);
             last_x = event.values[0];
             last_y = event.values[1];
             last_z = event.values[2];
-            Toast watch_t = Toast.makeText(getApplicationContext(),"Random Location: XYZ", Toast.LENGTH_SHORT);
-            watch_t.show();
+            //Toast watch_t = Toast.makeText(getApplicationContext(),"Random Location: XYZ", Toast.LENGTH_SHORT);
+            //watch_t.show();
             fireMessage("GO/Congressional"); //The message tells the phone to shift to congressional view
 
-            Intent i = new Intent(this, MainActivity.class);
-            startActivity(i);
+            //Intent i = new Intent(this, MainActivity.class);
+            //startActivity(i);
 
         }
-        // Do something with this sensor value.
     }
 
     @Override
@@ -112,6 +152,25 @@ public class Data2012 extends WearableActivity implements SensorEventListener {
         Intent msgIntent = new Intent(this, SendPhoneMessageIntentService.class);
         msgIntent.putExtra(SendPhoneMessageIntentService.INPUT_EXTRA, text);
         startService(msgIntent);
+    }
+
+    public String loadJSONFromAsset() {
+        /**
+         * Loads the election json file into a string that we can use.
+         */
+        String json = null;
+        try {
+            InputStream is = this.getAssets().open("election-county-2012.json");
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            json = new String(buffer, "UTF-8");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+        return json;
     }
 }
 

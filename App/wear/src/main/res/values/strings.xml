@@ -2,6 +2,5 @@
     <string name="app_name">WearSyncService</string>
     <string name="hello_world">Press send to send the following message to watch</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

@@ -10,7 +10,6 @@ public class Constant {
 }
 
 
-//TODO: Change colour of toolbar
 //TODO: Change colours of cards in 2d picker
 //TODO:Add rounded corners to all the buttons
 //TODO: Clean up the menu page.

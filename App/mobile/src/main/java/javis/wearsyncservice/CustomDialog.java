@@ -6,12 +6,29 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.twitter.sdk.android.Twitter;
+import com.twitter.sdk.android.core.AppSession;
+import com.twitter.sdk.android.core.Callback;
+import com.twitter.sdk.android.core.Result;
+import com.twitter.sdk.android.core.TwitterApiClient;
+import com.twitter.sdk.android.core.TwitterAuthConfig;
+import com.twitter.sdk.android.core.TwitterCore;
+import com.twitter.sdk.android.core.TwitterException;
+import com.twitter.sdk.android.core.models.Tweet;
+import com.twitter.sdk.android.core.models.User;
+import com.twitter.sdk.android.core.services.StatusesService;
+import com.twitter.sdk.android.tweetui.CompactTweetView;
+
+import io.fabric.sdk.android.Fabric;
 
 import java.util.HashMap;
 import android.app.Activity;
@@ -29,6 +46,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.HashMap;
+import java.util.List;
 
 //import edu.berkeley.cs160.plswork.R;
 
@@ -45,12 +63,19 @@ public class CustomDialog extends DialogFragment {
 
     // Use this instance of the interface to deliver action events
     CustomDialogListener mListener;
-    HashMap<String,String> EdLabov;
-    HashMap<String,String> LauraLakoff;
-    HashMap<String,String> HannahWhorf;
-    HashMap<String,String> MarkHagen;
-    HashMap<String,String> RonanNash;
-    //TODO: Find a better way to store & reference this dictionary of dummy data
+    String[] bioguide_id;
+    int position;
+    String[] name; //holds all the candidate names in order
+    String[] party; //holds all the parties in order
+    String[] title; //holds either Senator or Representative // take from title tag in json object
+    String[] email;// oc_email tag
+    String[] website;// website tag
+    String[] twitter_id; //twitter_id tag
+    String[] term_end; //term_end tag
+
+    // Note: Your consumer key and secret should be obfuscated in your source code before shipping.
+    private static final String TWITTER_KEY = "xPBH74d17OPYBRSyOiAbo8HlN";
+    private static final String TWITTER_SECRET = "mg6OvvLt0xsmCmn67FqutOTrT4rsFAcIflaNGWEYStLvLj89HI";
 
     // Override the Fragment.onAttach() method to instantiate the NoticeDialogListener
     @Override
@@ -67,7 +92,6 @@ public class CustomDialog extends DialogFragment {
         }
     }
 
-    //TODO: WHat does the email and website with link have to do specifically?
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // Use the Builder class for convenient dialog construction
@@ -75,70 +99,148 @@ public class CustomDialog extends DialogFragment {
 
         Bundle mArgs = getArguments(); //Does this go here??
         String clicked_name = mArgs.getString("clicked_name");
+        bioguide_id = mArgs.getStringArray("bioguide_id");
+        position = mArgs.getInt("position");
+        name = mArgs.getStringArray("name");
+        party = mArgs.getStringArray("party");
+        title = mArgs.getStringArray("title");
+        email = mArgs.getStringArray("email");
+        website = mArgs.getStringArray("website");
+        twitter_id = mArgs.getStringArray("twitter_id");
+        term_end = mArgs.getStringArray("term_end");
         //TODO: Add coloured stroke around the candidate image.
 
-        fill_maps(); //stores all the data before it needs to be accessed.
+        //fill_maps(); //stores all the data before it needs to be accessed.
 
         // Get the layout inflater
         LayoutInflater inflater = getActivity().getLayoutInflater();
         // Inflate and set the layout for the dialog
         // Pass null as the parent view because its going in the dialog layout
         //builder.setView(R.layout.screen_split); //Sets the custom layout for the layout
-        View w = inflater.inflate(R.layout.screen_split, null);
+        final View w = inflater.inflate(R.layout.screen_split, null);
         builder.setView(w);
-        TextView title = (TextView)w.findViewById(R.id.Title);
-        TextView party = (TextView)w.findViewById(R.id.Party);
-        TextView email = (TextView)w.findViewById(R.id.Email);
-        TextView website = (TextView)w.findViewById(R.id.Website);
-        ImageView picture = (ImageView)w.findViewById(R.id.overlapImage);
-        ImageView tweet = (ImageView)w.findViewById(R.id.Tweet);
+        TextView title_widget = (TextView)w.findViewById(R.id.Title);
+        TextView party_widget = (TextView)w.findViewById(R.id.Party);
+        TextView email_widget = (TextView)w.findViewById(R.id.Email);
+        TextView website_widget = (TextView)w.findViewById(R.id.Website);
+        final ImageView picture_widget = (ImageView)w.findViewById(R.id.overlapImage);
+        //ImageView tweet_widget = (ImageView)w.findViewById(R.id.Tweet);
         ImageButton mail_icon = (ImageButton)w.findViewById(R.id.MailIcon);
         ImageButton home_icon = (ImageButton)w.findViewById(R.id.HomeIcon);
-        HashMap<String,String> info = get_correct_map(clicked_name);
+        //HashMap<String,String> info = get_correct_map(clicked_name);
 
-        title.setText(info.get("title"));
-        party.setText(info.get("party"));
-        picture.setImageResource(Integer.parseInt(info.get("picture")));
-        tweet.setImageResource(Integer.parseInt(info.get("tweet")));
+        title_widget.setText(title[position]+" "+name[position]);
+        party_widget.setText(party[position]);
+//        picture.setImageResource(Integer.parseInt(info.get("picture")));
+//        tweet.setImageResource(Integer.parseInt(info.get("tweet")));
 
         LinearLayout top = (LinearLayout)w.findViewById(R.id.layoutTop);
 
-        if (party.getText()=="DEMOCRAT")
+        if (party[position]=="DEMOCRAT")
         {
-            party.setTextColor(ContextCompat.getColor(getActivity().getApplicationContext(), R.color.blue));
+            party_widget.setTextColor(ContextCompat.getColor(getActivity().getApplicationContext(), R.color.blue));
             mail_icon.setImageResource(R.drawable.blueenvelope);
             home_icon.setImageResource(R.drawable.bluehome);
             top.setBackgroundColor(ContextCompat.getColor(getActivity().getApplicationContext(), R.color.blue));
         }
-        else if (party.getText()=="REPUBLICAN")
+        else if (party[position]=="REPUBLICAN")
         {
-            party.setTextColor(ContextCompat.getColor(getActivity().getApplicationContext(), R.color.red));
+            party_widget.setTextColor(ContextCompat.getColor(getActivity().getApplicationContext(), R.color.red));
             mail_icon.setImageResource(R.drawable.mailredenvelope);
             home_icon.setImageResource(R.drawable.redhome);
             top.setBackgroundColor(ContextCompat.getColor(getActivity().getApplicationContext(), R.color.red));
         }
-        email.setText(info.get("email"));
-        website.setText(info.get("website"));
+        //email_widget.setText(email[position]);
+        //website_widget.setText(website[position]);
+        website_widget.setClickable(true);
+        website_widget.setMovementMethod(LinkMovementMethod.getInstance());
+        String text = "<a href='"+website[position]+"'>"+ website[position] +"</a>";
+        website_widget.setText(Html.fromHtml(text));
+        email_widget.setClickable(true);
+        email_widget.setText(Html.fromHtml("<a href=\"mailto:"+email[position]+"\">"+email[position]+"</a>"));
+        email_widget.setMovementMethod(LinkMovementMethod.getInstance());
 
-//        builder.setTitle(R.string.app_name)
-//                //.setMessage(R.string.dialog_fire_missiles)
-//                .setPositiveButton(R.string.fire, new DialogInterface.OnClickListener() {
-//                    public void onClick(DialogInterface dialog, int id) {
-//                        // FIRE ZE MISSILES!
-//                        mListener.onDialogPositiveClick(CustomDialog.this);
-//                    }
-//                })
-//                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-//                    public void onClick(DialogInterface dialog, int id) {
-//                        // User cancelled the dialog
-//                        mListener.onDialogNegativeClick(CustomDialog.this);
-//                    }
-//                });
-        // Create the AlertDialog object and return it
+        //EMBED TWEET STUFF
+        TwitterAuthConfig authConfig = new TwitterAuthConfig(TWITTER_KEY, TWITTER_SECRET);
+        Fabric.with(getActivity(), new Twitter(authConfig));
+
+        TwitterCore.getInstance().logInGuest(new Callback<AppSession>() {
+            @Override
+            public void success(Result appSessionResult) {
+                AppSession guestAppSession = (AppSession) appSessionResult.data;
+
+                TwitterApiClient twitterApiClient = TwitterCore.getInstance().getApiClient(guestAppSession);
+                //SearchService service = twitterApiClient.getSearchService();
+                //service.tweets("crime", null, "en", null, null, null, null, null, null, true, new Callback<Search>()
+                StatusesService service = twitterApiClient.getStatusesService();
+                int count = 1;
+                final LinearLayout myLayout
+                        = (LinearLayout)w.findViewById(R.id.my_tweet_layout);
+                service.userTimeline(null, twitter_id[position] ,count, null, null, null, null, null, null, new Callback<List<Tweet>>() {
+                    @Override
+                    public void success(Result<List<Tweet>> result) {
+                        System.out.println("BAZOOKA YUM SUCCESS");
+                        final List<Tweet> tweets = result.data;
+                        for (Tweet tweet : tweets) {
+                            /*TweetView v = (TweetView)findViewById(R.id.bike_tweet);
+                            v.setTweet(tweet);*/
+                            myLayout.addView(new CompactTweetView(getActivity(), tweet));
+                            //String x = tweet.text + "\n\n";
+                            //System.out.println("BAZOOKA x = " + x);
+                        }
+                    }
+
+                    @Override
+                    public void failure(TwitterException e) {
+                        System.out.println("BAZOOKA Failure " + e.getMessage());
+                    }
+                });
+            }
+
+            public void failure(TwitterException exception) {
+                //Do something on failure
+                System.out.println("BAZOOKA FAILURE in guest auth");
+            }
+
+        });
+
+        //EMBED TWEET STUFF
+
+
+        //TWITTER IMAGE STUFF
+        TwitterCore.getInstance().logInGuest(new com.twitter.sdk.android.core.Callback<AppSession>() {
+            @Override
+            public void success(Result appSessionResult) {
+                AppSession guestAppSession = (AppSession) appSessionResult.data;
+                //TwitterSession guestAppSession = (TwitterSession) appSessionResult.data;
+
+                new MyTwitterApiClient(guestAppSession).getUsersService().show(null, twitter_id[position], true, new com.twitter.sdk.android.core.Callback<User>() {
+                    @Override
+                    public void success(Result<User> result)
+                    {
+                        new DownloadImageTask(picture_widget)
+                                .execute(result.data.profileImageUrlHttps.replace("_normal", "_bigger"));
+                        //The original image was 200 x 200
+                    }
+                    @Override
+                    public void failure(TwitterException exception)
+                    {
+
+                    }
+                });
+            }
+            public void failure(TwitterException exception) {
+                //Do something on failure
+                System.out.println("BAZOOKA FAILURE in guest auth");
+            }
+
+        });
+
+        //TWITTER IMAGE STUFF
         return builder.create();
     }
 
-    private HashMap<String,String> get_correct_map(String name)
+   /* private HashMap<String,String> get_correct_map(String name)
     {
         switch(name)
         {
@@ -150,8 +252,8 @@ public class CustomDialog extends DialogFragment {
         }
         return new HashMap<String,String>();//should never reach this state.
     }
-
-    private void fill_maps()
+*/
+   /* private void fill_maps()
     //Stores the dummy data in all the dictionaries.
     {
         EdLabov = new HashMap<String,String>();
@@ -213,6 +315,6 @@ public class CustomDialog extends DialogFragment {
         RonanNash.put("bills","XYZ Committee \n \t\t\t\t\t\t ABC Committee");
         MarkHagen.put("bills","XYZ Committee \n \t\t\t\t\t\t ABC Committee");
         LauraLakoff.put("bills","XYZ Committee \n \t\t\t\t\t\t ABC Committee");
-    }
+    }*/
 
 }

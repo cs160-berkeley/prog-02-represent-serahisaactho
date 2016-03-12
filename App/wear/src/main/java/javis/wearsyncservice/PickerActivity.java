@@ -47,7 +47,10 @@ public class PickerActivity extends WearableActivity implements SensorEventListe
         DotsPageIndicator dots = (DotsPageIndicator) findViewById(R.id.indicator);
         //try to lift up the dots positioning
         dots.setPager(pager);
-        pager.setAdapter(new PickerAdapter(this, getFragmentManager()));
+        Intent i = getIntent();
+        String[] name_title = i.getStringArrayExtra(SunlightWearInstructions.NAMES_TITLES);
+        String[] party = i.getStringArrayExtra(SunlightWearInstructions.PARTIES);
+        pager.setAdapter(new PickerAdapter(this, getFragmentManager(), name_title, party));
     }
 
 
@@ -58,9 +61,7 @@ public class PickerActivity extends WearableActivity implements SensorEventListe
 
     @Override
     public final void onSensorChanged(SensorEvent event) {
-        // The light sensor returns a single value.
-        // Many sensors return 3 values, one for each axis.
-        //float lux = event.values[0];
+
         if ((event.values[0]!=last_x || event.values[1]!=last_y || event.values[2]!=last_z)
                 && last_x==BASE_VALUE && last_y==BASE_VALUE && last_z==BASE_VALUE)
         {
@@ -69,21 +70,23 @@ public class PickerActivity extends WearableActivity implements SensorEventListe
             last_z = event.values[2];
             //This clause is put in to avoid the very first acceleration change detection
         }
-        else if (event.values[0]!=last_x || event.values[1]!=last_y || event.values[2]!=last_z) {
+        else if (Math.abs(event.values[0]-last_x)>=10
+                || Math.abs(event.values[1]-last_y)>=10
+                || Math.abs(event.values[2]-last_z)>=10) {
+        //else if (event.values[0]!=last_x || event.values[1]!=last_y || event.values[2]!=last_z) {
             System.out.println("BAZOOKA Detected a shake " + event.values[0] + ", " + event.values[1] + ", " +
                     event.values[2]);
             last_x = event.values[0];
             last_y = event.values[1];
             last_z = event.values[2];
-            Toast watch_t = Toast.makeText(getApplicationContext(),"Random Location: XYZ", Toast.LENGTH_SHORT);
-            watch_t.show();
+            //Toast watch_t = Toast.makeText(getApplicationContext(),"Random Location: XYZ", Toast.LENGTH_SHORT);
+            //watch_t.show();
             fireMessage("GO/Congressional"); //The message tells the phone to shift to congressional view
 
-            Intent i = new Intent(this, MainActivity.class);
-            startActivity(i);
+            //Intent i = new Intent(this, MainActivity.class);
+            //startActivity(i);
 
         }
-        // Do something with this sensor value.
     }
 
     public void update_phone(View w)
@@ -95,7 +98,7 @@ public class PickerActivity extends WearableActivity implements SensorEventListe
         TextView name = (TextView)w.findViewById(R.id.Title);
         String formatted_name = new String();
         String name_txt = name.getText().toString();
-        switch(name_txt)
+        /*switch(name_txt)
                 //The purpose of this switch block is to ensure that the phone
                 //receives a message that it can interpret.
         {
@@ -104,8 +107,9 @@ public class PickerActivity extends WearableActivity implements SensorEventListe
             case "Senator Ed Labov": formatted_name = "Ed Labov"; break;
             case "Representative Hannah Whorf": formatted_name = "Hannah Whorf"; break;
             case "Senator Mark Hagen": formatted_name = "Mark Hagen"; break;
-        }
-        System.out.println("BAZOOKA Will do the needful in the phone");
+        }*/
+//        System.out.println("BAZOOKA Will do the needful in the phone");
+        formatted_name = name_txt.substring(name_txt.indexOf(' ')+1); //Removes the title from the name
         fireMessage(formatted_name);
     }
 

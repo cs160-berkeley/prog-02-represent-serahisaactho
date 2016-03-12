@@ -32,7 +32,9 @@ public class SendWatchMessageIntentService extends IntentService implements Goog
         NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(mApiClient).await();
         for (Node node : nodes.getNodes()) {
             MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(
-            mApiClient, node.getId(), PhoneWatchClass.PHONE_TO_WATCH_MESSAGE_PATH, intent.getStringExtra(INPUT_EXTRA).getBytes()).await();
+            mApiClient, node.getId(),
+                    PhoneWatchClass.PHONE_TO_WATCH_MESSAGE_PATH,
+                    intent.getStringExtra(INPUT_EXTRA).getBytes()).await();
         }
     }
 
